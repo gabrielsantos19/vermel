@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            .plano_de_fundo {
+                position: fixed;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                height: auto;
+                width: auto;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .plano_de_fundo img {
+                background-color: hsl(0, 0%, 25%);
+                transform:rotate(90deg);
+            }
+        </style>
+    </head>
+    <body>
+        <div class="plano_de_fundo">
+            <img src="http://192.168.15.3:4747/video">
+        </div>
+        <script type="application/javascript">
+            const teclas_pressionadas = new Set()
+            let teclas_pressionadas_old = new Set()
+            let modulo = 0
+
+            let are_sets_equal = (a, b) => a.size === b.size && [...a].every(value => b.has(value))
+
+            function build_payload() {
+                payload = [0,0,0]
+                if(teclas_pressionadas.has('i')) {
+                    payload[2] = 1
+                } else if(teclas_pressionadas.has('k')) {
+                    payload[2] = 255
+                } else {
+                    payload[2] = 0
+                }
+
+                if(teclas_pressionadas.has('j')) {
+                    payload[1] = 50
+                } else if(teclas_pressionadas.has('l')) {
+                    payload[1] = 110
+                } else if(teclas_pressionadas.has('f')) {
+                    payload[1] = 30
+                } else if(teclas_pressionadas.has('g')) {
+                    payload[1] = 130
+                } else {
+                    payload[1] = 80
+                } 
+
+                return {
+                    modulo: modulo,
+                    direcao: payload[1],
+                    sentido: payload[2],
+                }
+            }
+
+            function post_payload() {
+                if(are_sets_equal(teclas_pressionadas, teclas_pressionadas_old)) {
+                    return
+                }
+                teclas_pressionadas_old = new Set([...teclas_pressionadas])
+
+                payload = build_payload()
+                console.log(payload)
+
+                fetch('http://127.0.0.1:5000/', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                }).then(res => {
+                    //console.log("Request complete! response:", res);
+                })
+            }
+
+            function on_keydown(event) {
+                //console.log(event.type, event.key, event.code, teclas_pressionadas)
+                teclas_pressionadas.add(event.key)
+                if(event.key === '4') {
+                    modulo = 255
+                }
+                post_payload()
+            }
+
+            function on_keyup(event) {
+                //console.log(event.type, event.key, event.code, teclas_pressionadas)
+                teclas_pressionadas.delete(event.key)
+                post_payload()
+            }
+
+            document.addEventListener('keydown', on_keydown, false)
+            document.addEventListener('keyup', on_keyup, false)
+        </script>
+    </body>
+</html>
