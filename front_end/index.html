@@ -2,7 +2,7 @@
 <html>
     <head>
         <style>
-            .plano_de_fundo {
+            .plano {
                 position: fixed;
                 top: 0;
                 right: 0;
@@ -10,20 +10,66 @@
                 left: 0;
                 height: auto;
                 width: auto;
+            }
+            .plano_0 {
+                display: flex;
+                justify-content: center;
+                align-items: stretch;
+            }
+            .plano_1 {
                 display: flex;
                 justify-content: center;
                 align-items: center;
             }
-            .plano_de_fundo img {
+            .plano_2 {
+                display: flex;
+                justify-content: flex-end;
+                align-items: flex-end;
+            }
+            .plano_1 img {
                 background-color: hsl(0, 0%, 25%);
-                transform:rotate(90deg);
+                background-image: "video.png";
+                transform: rotate(90deg);
+            }
+            .velocimetro {
+                padding: 15px;
+            }
+            .velocimetro_pwm {
+                position: absolute;
+                bottom: 100px;
+                right: 55px;
+                color: lightgray;
+                font-size: 30pt;
+                font-family: 'Arial';
+            }
+            .velocimetro_sentido {
+                position: absolute;
+                bottom: 150px;
+                right: 55px;
+                color: lightgray;
+                font-size: 30pt;
+            }
+            .imagem_preechimento {
+                width: 100%;
+                filter: blur(15px);
             }
         </style>
     </head>
     <body>
-        <div class="plano_de_fundo">
-            <img src="http://192.168.15.3:4747/video">
+        <div class="plano plano_0">
+            <img class="imagem_preechimento" src="video.jpg">
         </div>
+
+        <div class="plano plano_1">
+            <img src="http://192.168.15.3:4747/video" onerror="this.onerror=null; this.src='video.jpg'">
+        </div>
+
+        <div class="plano plano_2">
+            <img class="velocimetro" src="./NFSU2_CG_Griffin2.webp">
+            <span id="velocimetro_pwm" class="velocimetro_pwm">0</span>
+            <span id="velocimetro_sentido" class="velocimetro_sentido">0</span>
+        </div>
+
         <script type="application/javascript">
             const teclas_pressionadas = new Set()
             let teclas_pressionadas_old = new Set()
@@ -51,7 +97,15 @@
                     payload[1] = 130
                 } else {
                     payload[1] = 80
-                } 
+                }
+
+                // Atualizar elementos do velocímetro
+                document.getElementById("velocimetro_pwm").innerHTML = modulo
+                if(payload[2] & 0b10000000) {
+                    document.getElementById("velocimetro_sentido").innerHTML = -((~payload[2] & 0xFF) + 1)
+                } else {
+                    document.getElementById("velocimetro_sentido").innerHTML = payload[2]
+                }
 
                 return {
                     modulo: modulo,
@@ -81,7 +135,15 @@
             function on_keydown(event) {
                 //console.log(event.type, event.key, event.code, teclas_pressionadas)
                 teclas_pressionadas.add(event.key)
-                if(event.key === '4') {
+                if(event.key === '0') {
+                    modulo = 0
+                } else if(event.key === '1') {
+                    modulo = 100
+                } else if(event.key === '2') {
+                    modulo = 200
+                } else if(event.key === '3') {
+                    modulo = 220
+                } else if(event.key === '4') {
                     modulo = 255
                 }
                 post_payload()
