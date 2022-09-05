@@ -3,7 +3,7 @@ import flask
 import cv2
 
 
-app = flask.Flask(__name__)
+app = flask.Flask(__name__, static_url_path='', static_folder='front_end')
 arduino = None
 rtsp_url = 'rtsp://user:pass@192.168.0.0'
 
@@ -19,7 +19,7 @@ def video_feed():
         yield (m.encode() + b)
 
 
-@app.route('/', methods=['POST','OPTIONS'])
+@app.route('/api', methods=['POST','OPTIONS'])
 def root_post():
     if flask.request.method == 'POST': # CORS preflight
         global arduino
