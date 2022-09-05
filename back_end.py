@@ -1,8 +1,23 @@
 import serial
 import flask
+import cv2
+
 
 app = flask.Flask(__name__)
 arduino = None
+rtsp_url = 'rtsp://user:pass@192.168.0.0'
+
+
+def video_feed():
+    cap = cv2.VideoCapture(rtsp_url)
+    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    while True:
+        ret, frame = cap.read()
+        result, encimg = cv2.imencode('.jpg', frame)
+        b = encimg.tobytes()
+        m = f'--frame\r\nContent-Type: image/jpeg\r\nContent-Length: {len(b)}\r\n\r\n'
+        yield (m.encode() + b)
+
 
 @app.route('/', methods=['POST','OPTIONS'])
 def root_post():
@@ -31,6 +46,12 @@ def root_post():
         response.headers.add('Access-Control-Allow-Headers', "Content-Type")
         response.headers.add('Access-Control-Allow-Methods', "POST")
         return response
+
+
+@app.route('/video')
+def video():
+    return flask.Response(video_feed(), mimetype='multipart/x-mixed-replace; boundary=--frame')
+
 
 if __name__ == '__main__':
     app.run()
