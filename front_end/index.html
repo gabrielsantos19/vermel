@@ -29,7 +29,8 @@
             .plano_1 img {
                 background-color: hsl(0, 0%, 25%);
                 background-image: "video.png";
-                flex-grow: 1;
+                /* flex-grow: 1; */
+                transform: rotate(90deg);
             }
             .velocimetro {
                 padding: 15px;
@@ -61,7 +62,8 @@
         </div>
 
         <div class="plano plano_1">
-            <img src="./video" onerror="this.onerror=null; this.src='video.jpg'">
+            <!-- <img src="./video" onerror="this.onerror=null; this.src='video.jpg'"> -->
+            <img src="http://192.168.15.4:4747/video" onerror="this.onerror=null; this.src='video.jpg'">
         </div>
 
         <div class="plano plano_2">
